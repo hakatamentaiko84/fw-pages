@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <script src="./auth.js"></script>
+  <script>document.addEventListener('DOMContentLoaded',function(){FireworkSSO.protect();});</script>
+<meta charset="UTF-8">
+<title>マツココライブ 出演者フィードバック会 進行台本</title>
+<style>
+  :root{
+    --primary:#E5556B;
+    --primary-soft:#FBE6EA;
+    --dark:#1A1A2E;
+    --dark-soft:#2C2C44;
+    --light:#FAF7F2;
+    --paper:#FFFFFF;
+    --accent:#E8B547;
+    --line:#E8E4DD;
+    --text:#2A2A36;
+    --muted:#7A7A88;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif;background:var(--dark);display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px 16px;color:var(--text)}
+
+  /* スライド */
+  .slide-wrapper{width:100%;max-width:1024px}
+  .slide{display:none;width:1024px;min-height:640px;background:var(--paper);position:relative;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,0.45);border-radius:6px}
+  .slide.active{display:flex;flex-direction:column}
+
+  /* 表紙 */
+  .slide-cover{background:linear-gradient(135deg,#1A1A2E 0%,#2C2C44 100%);color:white;justify-content:center;align-items:center;text-align:center;padding:72px}
+  .slide-cover .eyebrow{font-size:13px;color:var(--primary);letter-spacing:6px;margin-bottom:18px;text-transform:uppercase;font-weight:600}
+  .slide-cover .accent-bar{width:64px;height:3px;background:var(--primary);margin:0 auto 32px}
+  .slide-cover .title{font-size:42px;font-weight:700;line-height:1.35;margin-bottom:18px;letter-spacing:0.04em}
+  .slide-cover .subtitle{font-size:18px;color:rgba(255,255,255,0.72);margin-bottom:48px;letter-spacing:0.08em}
+  .slide-cover .meta{font-size:13px;color:rgba(255,255,255,0.55);line-height:2.1;letter-spacing:0.06em}
+  .slide-cover .meta strong{color:white;font-weight:500}
+
+  /* 通常スライドヘッダー */
+  .slide-header{background:var(--dark);padding:22px 56px;color:white;flex-shrink:0;border-left:6px solid var(--primary)}
+  .slide-header .section-tag{font-size:11px;color:var(--primary);letter-spacing:3px;margin-bottom:6px;font-weight:600}
+  .slide-header h2{font-size:24px;font-weight:700;letter-spacing:0.02em}
+  .slide-header .section-time{display:inline-block;margin-left:14px;font-size:12px;background:var(--primary);color:white;padding:3px 10px;border-radius:12px;letter-spacing:0.06em;font-weight:500;vertical-align:2px}
+
+  /* 本文 */
+  .slide-body{flex:1;padding:36px 56px 64px;display:flex;flex-direction:column;gap:18px;background:var(--paper)}
+  .slide-body.alt{background:var(--light)}
+
+  .lead{font-size:18px;font-weight:600;color:var(--dark);line-height:1.6}
+  .body-text{font-size:14px;color:#3a3a48;line-height:1.9}
+  .small{font-size:12px;color:var(--muted);line-height:1.7}
+
+  /* タイムライン（アジェンダ用） */
+  .agenda{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+  .agenda-row{display:grid;grid-template-columns:128px 28px 1fr 80px;align-items:stretch;gap:14px;padding:12px 14px;background:var(--paper);border:1px solid var(--line);border-radius:6px;border-left:4px solid var(--primary)}
+  .agenda-row.break{border-left-color:var(--muted);background:#F4F2EE}
+  .agenda-row.workshop{border-left-color:var(--accent)}
+  .agenda-time{font-size:13px;font-weight:700;color:var(--dark);align-self:center;letter-spacing:0.04em}
+  .agenda-time small{display:block;font-size:10px;color:var(--muted);font-weight:500;margin-top:2px}
+  .agenda-icon{align-self:center;width:28px;height:28px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  .agenda-row.break .agenda-icon{background:#EAE6DD;color:var(--muted)}
+  .agenda-row.workshop .agenda-icon{background:#FCF1D8;color:var(--accent)}
+  .agenda-title{font-size:14px;font-weight:600;color:var(--dark);align-self:center;line-height:1.5}
+  .agenda-title small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:3px}
+  .agenda-min{font-size:12px;color:var(--muted);align-self:center;text-align:right;font-weight:500}
+
+  /* カードグリッド */
+  .grid{display:grid;gap:14px;margin-top:6px}
+  .grid.col-2{grid-template-columns:repeat(2,1fr)}
+  .grid.col-3{grid-template-columns:repeat(3,1fr)}
+  .grid.col-4{grid-template-columns:repeat(4,1fr)}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:18px;border-top:3px solid var(--primary)}
+  .card .card-tag{display:inline-block;font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-soft);padding:3px 9px;border-radius:10px;margin-bottom:10px;letter-spacing:0.08em}
+  .card .card-title{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:10px;line-height:1.4}
+  .card .card-body{font-size:12.5px;color:#3a3a48;line-height:1.75}
+
+  /* お悩みカード（アンケート結果） */
+  .voice-card{background:var(--light);border-radius:8px;padding:16px 18px;border-left:3px solid var(--primary);margin-bottom:8px}
+  .voice-card:last-child{margin-bottom:0}
+  .voice-card .voice-text{font-size:13px;color:var(--dark);line-height:1.7}
+  .voice-card .voice-meta{font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:0.04em}
+
+  /* タグ */
+  .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{display:inline-block;font-size:11px;background:var(--primary-soft);color:var(--primary);padding:4px 10px;border-radius:12px;font-weight:500;letter-spacing:0.04em}
+  .tag.dark{background:var(--dark);color:white}
+  .tag.gold{background:#FCF1D8;color:#9A7820}
+
+  /* リスト */
+  .neat-list{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .neat-list li{display:flex;align-items:flex-start;gap:12px;font-size:13.5px;color:#333;line-height:1.7}
+  .neat-list li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--primary);margin-top:9px;flex-shrink:0}
+
+  .num-list{list-style:none;display:flex;flex-direction:column;gap:14px;counter-reset:n}
+  .num-list li{display:flex;gap:14px;align-items:flex-start;font-size:13.5px;color:#333;line-height:1.7;counter-increment:n}
+  .num-list li::before{content:counter(n);width:26px;height:26px;border-radius:50%;background:var(--dark);color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+
+  /* 進行台本 */
+  .script-block{background:var(--light);border-radius:8px;padding:14px 18px;border-left:3px solid var(--accent);font-size:13px;color:#3a3a48;line-height:1.85}
+  .script-block .speaker{display:inline-block;font-weight:700;color:var(--dark);font-size:11.5px;background:white;padding:2px 8px;border-radius:10px;margin-right:8px;letter-spacing:0.06em}
+
+  /* テーマカード（座談会） */
+  .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .theme-card{background:white;border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;border-top:3px solid var(--accent);position:relative;display:flex;flex-direction:column}
+  .theme-card .theme-num{position:absolute;top:-10px;left:14px;background:var(--accent);color:white;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:0.08em}
+  .theme-card .theme-title{font-size:14.5px;font-weight:700;color:var(--dark);margin-bottom:8px;line-height:1.45;margin-top:6px}
+  .theme-card .theme-desc{font-size:12px;color:#444;line-height:1.65;flex:1}
+  .theme-card .theme-tag{font-size:10.5px;color:var(--muted);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+
+  /* 強み一覧（ワード集合風） */
+  .strength-cloud{display:flex;flex-wrap:wrap;gap:8px;padding:18px;background:var(--light);border-radius:8px}
+  .strength-cloud .pill{font-size:13px;background:white;border:1px solid var(--line);padding:6px 14px;border-radius:18px;color:var(--dark);font-weight:500}
+  .strength-cloud .pill.lg{font-size:15px;font-weight:700;background:var(--primary);color:white;border-color:var(--primary)}
+  .strength-cloud .pill.md{font-size:14px;background:var(--dark);color:white;border-color:var(--dark)}
+  .strength-cloud .pill.gold{background:#FCF1D8;color:#7A5C12;border-color:#F0DFA8}
+
+  /* 注意ボックス */
+  .note-box{background:var(--primary-soft);border-radius:8px;padding:14px 18px;border-left:3px solid var(--primary);font-size:13px;color:var(--dark);line-height:1.7}
+  .note-box strong{color:var(--primary)}
+
+  /* セクション区切り */
+  .section-divider{display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,var(--dark) 0%,var(--dark-soft) 100%);color:white;text-align:center;padding:80px 56px}
+  .section-divider .d-num{font-size:14px;color:var(--primary);letter-spacing:6px;margin-bottom:14px;font-weight:600}
+  .section-divider .d-title{font-size:38px;font-weight:700;letter-spacing:0.04em;line-height:1.4;margin-bottom:18px}
+  .section-divider .d-sub{font-size:15px;color:rgba(255,255,255,0.65);line-height:1.8;letter-spacing:0.04em;max-width:680px;margin:0 auto}
+  .section-divider .d-meta{margin-top:32px;display:inline-block;background:rgba(255,255,255,0.08);padding:8px 18px;border-radius:18px;font-size:12px;color:rgba(255,255,255,0.7);letter-spacing:0.1em}
+
+  /* テーブル */
+  .data-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .data-table th{background:var(--dark);color:white;padding:10px 12px;text-align:left;font-weight:600;letter-spacing:0.04em}
+  .data-table td{padding:10px 12px;border-bottom:1px solid var(--line);color:#333;line-height:1.6;vertical-align:top}
+  .data-table tr:nth-child(even) td{background:var(--light)}
+
+  /* フッター */
+  .slide-footer{position:absolute;bottom:0;right:0;left:0;padding:8px 56px;display:flex;justify-content:space-between;align-items:center;background:rgba(26,26,46,0.04);border-top:1px solid var(--line)}
+  .slide-footer .left{font-size:10.5px;color:var(--muted);letter-spacing:0.06em}
+  .slide-footer .right{font-size:10.5px;color:var(--muted)}
+
+  /* ナビゲーション */
+  .nav-bar{display:flex;align-items:center;gap:16px;margin-top:18px}
+  .nav-btn{background:rgba(229,85,107,0.85);color:white;border:none;padding:10px 22px;border-radius:4px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:background 0.2s;letter-spacing:0.05em}
+  .nav-btn:hover{background:var(--primary)}
+  .nav-btn:disabled{background:rgba(255,255,255,0.18);cursor:not-allowed;color:rgba(255,255,255,0.5)}
+  .slide-counter{color:rgba(255,255,255,0.7);font-size:13px;min-width:90px;text-align:center;letter-spacing:0.04em}
+  .last-updated{color:rgba(255,255,255,0.3);font-size:11px;margin-top:10px;letter-spacing:0.05em}
+
+  /* 印刷 */
+  @media print{
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+    @page{size:A4 landscape;margin:0}
+    body{background:white;padding:0}
+    .slide{display:flex !important;page-break-after:always;break-after:page;box-shadow:none;width:297mm;min-height:210mm;border-radius:0}
+    .nav-bar,.last-updated{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="slide-wrapper">
+
+<!-- ========== Slide 1: 表紙 ========== -->
+<section class="slide slide-cover active">
+  <div class="eyebrow">MATSUKOKO LIVE</div>
+  <div class="accent-bar"></div>
+  <h1 class="title">出演者フィードバック会</h1>
+  <div class="subtitle">― 一緒に、もっと楽しいライブをつくる時間 ―</div>
+  <div class="meta">
+    <strong>所要時間：2時間</strong>　|　<strong>形式：オンライン（Zoom）</strong><br>
+    <strong>参加：出演者4〜5名 ＋ 運営チーム</strong><br>
+    <strong>進行：MC（モリー） / サポート（運営チーム）</strong>
+  </div>
+</section>
+
+<!-- ========== Slide 2: 本日の目的 ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">PURPOSE — 本日の目的</div>
+    <h2>「演者として安心して話せる場」をつくる</h2>
+  </div>
+  <div class="slide-body">
+    <div class="lead">運営から伝える会ではなく、<span style="color:var(--primary)">演者のみなさんに話してもらう会</span>です。</div>
+    <div class="grid col-3">
+      <div class="card">
+        <div class="card-tag">01</div>
+        <div class="card-title">アンケートの内容を全員で共有する</div>
+        <div class="card-body">事前にいただいたお悩みを匿名でカテゴライズし、「自分だけじゃないんだ」を可視化。文脈や追加コメントを口頭で補ってもらう時間にします。</div>
+      </div>
+      <div class="card">
+        <div class="card-tag">02</div>
+        <div class="card-title">改善アクションを一緒に考える</div>
+        <div class="card-body">課題に対して「こうしたらよくない？」をその場で話し合う。運営が宿題として持ち帰るリストを、参加者全員と一緒につくります。</div>
+      </div>
+      <div class="card">
+        <div class="card-tag">03</div>
+        <div class="card-title">演者同士の交流を深める</div>
+        <div class="card-body">共演前に話せる機会が少ないという声に応えて、後半はトークテーマで雑談ベースの座談会へ。<br>仲良くなって帰ってもらうのがゴール。</div>
+      </div>
+    </div>
+    <div class="note-box" style="margin-top:6px">
+      <strong>本日の合言葉：</strong>「運営の意見」より「演者の声」を真ん中に。MCは交通整理だけ。話すぎ・脱線、大歓迎です。
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">2 / 18</div></div>
+</section>
+
+<!-- ========== Slide 3: 全体アジェンダ ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">AGENDA — 本日の流れ</div>
+    <h2>2時間の進行タイムテーブル</h2>
+  </div>
+  <div class="slide-body alt">
+    <div class="agenda">
+      <div class="agenda-row">
+        <div class="agenda-time">00:00 – 00:05<small>3分</small></div>
+        <div class="agenda-icon">①</div>
+        <div class="agenda-title">オープニング・本日の目的共有<small>「話す会」だよ、を全員に伝える</small></div>
+        <div class="agenda-min">運営</div>
+      </div>
+      <div class="agenda-row">
+        <div class="agenda-time">00:05 – 00:15<small>10分</small></div>
+        <div class="agenda-icon">②</div>
+        <div class="agenda-title">アイスブレイク・自己紹介<small>「最近ハマっているもの」＋ Zoom投票で1問</small></div>
+        <div class="agenda-min">全員</div>
+      </div>
+      <div class="agenda-row">
+        <div class="agenda-time">00:15 – 00:55<small>40分</small></div>
+        <div class="agenda-icon">③</div>
+        <div class="agenda-title">アンケート結果の共有 ＆ ディスカッション<small>カテゴリごとに「補足ありますか？」「どうしたら解決できそう？」</small></div>
+        <div class="agenda-min">全員</div>
+      </div>
+      <div class="agenda-row">
+        <div class="agenda-time">00:55 – 01:13<small>18分</small></div>
+        <div class="agenda-icon">④</div>
+        <div class="agenda-title">運営からのデータ・改善共有<small>良かった配信のお手本／競合比較／今年の方針</small></div>
+        <div class="agenda-min">運営</div>
+      </div>
+      <div class="agenda-row break">
+        <div class="agenda-time">01:13 – 01:18<small>5分</small></div>
+        <div class="agenda-icon">☕</div>
+        <div class="agenda-title">休憩<small>カメラオフOK・水分補給タイム</small></div>
+        <div class="agenda-min">— —</div>
+      </div>
+      <div class="agenda-row workshop">
+        <div class="agenda-time">01:18 – 01:55<small>37分</small></div>
+        <div class="agenda-icon">⑤</div>
+        <div class="agenda-title">トークテーマ座談会<small>1人ずつテーマカードを引いて回す形式（約5分×7テーマ）</small></div>
+        <div class="agenda-min">全員</div>
+      </div>
+      <div class="agenda-row">
+        <div class="agenda-time">01:55 – 02:00<small>5分</small></div>
+        <div class="agenda-icon">⑥</div>
+        <div class="agenda-title">クロージング・Next Step<small>運営が持ち帰るアクションリストを口頭で読み上げ</small></div>
+        <div class="agenda-min">運営</div>
+      </div>
+    </div>
+    <div class="small" style="margin-top:6px">※ 当日の盛り上がり次第で③と⑤の配分は前後します（最大±10分）。</div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">3 / 18</div></div>
+</section>
+
+<!-- ========== Slide 4: 進行ルール ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">GROUND RULES — 進行ルール</div>
+    <h2>話しやすい場をつくる4つのルール</h2>
+  </div>
+  <div class="slide-body">
+    <ol class="num-list">
+      <li><strong>「ここだけの話」OK。</strong>収録なし、議事メモのみ運営が取得します。お名前を出した発言は外に出ません。</li>
+      <li><strong>かぶってOK・割り込みOK。</strong>「あ、それ私も」が出やすい雰囲気を優先します。MCが交通整理します。</li>
+      <li><strong>分からない・悩み中もOK。</strong>「特にないです」も立派な回答。沈黙はMCが拾います。</li>
+      <li><strong>カメラはオン推奨／音声常時ON推奨。</strong>顔と相づちが見えると、画面越しでも話しやすくなります。スマホ参加の方は無理せず。</li>
+    </ol>
+    <div class="grid col-2" style="margin-top:8px">
+      <div class="card" style="border-top-color:var(--accent)">
+        <div class="card-tag" style="color:var(--accent);background:#FCF1D8">ZOOM運用</div>
+        <div class="card-title">使う機能</div>
+        <div class="card-body">
+          ・<strong>投票機能</strong>（アイスブレイクと、テーマ選びで使用）<br>
+          ・<strong>ホワイトボード</strong>（アンケート結果の表示／自由メモ）<br>
+          ・<strong>リアクション</strong>（👍❤️で気軽に同意表現）<br>
+          ・<strong>チャット</strong>（口頭で言いづらいことの代替）
+        </div>
+      </div>
+      <div class="card" style="border-top-color:var(--accent)">
+        <div class="card-tag" style="color:var(--accent);background:#FCF1D8">事前共有</div>
+        <div class="card-title">演者には前日までに送る</div>
+        <div class="card-body">
+          ・このHTMLの<strong>アジェンダだけを抜粋</strong>したもの<br>
+          ・「<strong>お名前を伏せたアンケート結果サマリー</strong>を当日共有します」の予告<br>
+          ・「<strong>気軽な会です</strong>」のメッセージ（構えさせない）
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">4 / 18</div></div>
+</section>
+
+<!-- ========== Slide 5: アイスブレイク ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">PART ① — 00:05 – 00:15</div>
+    <h2>アイスブレイク・自己紹介<span class="section-time">10分</span></h2>
+  </div>
+  <div class="slide-body">
+    <div class="lead">画面越しの空気を一度ほぐすパート。「ちゃんと喋るぞ」モードを解除します。</div>
+    <div class="grid col-2">
+      <div class="card">
+        <div class="card-tag">5分</div>
+        <div class="card-title">① 一言自己紹介（一人 30〜45秒）</div>
+        <div class="card-body">
+          <strong>テンプレ：</strong>お名前 ＋ 出演歴 ＋ <span style="color:var(--primary)">「最近ハマっているもの」</span>を一つ。<br><br>
+          ※「最近ハマっているもの」はアンケートの趣味欄から拾えるので、MCは拾い読みでイジれるよう手元に置く。
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-tag">5分</div>
+        <div class="card-title">② Zoom投票でアイスブレイク</div>
+        <div class="card-body">
+          選択肢から1問だけ。結果を見て一言ずつ。<br><br>
+          <strong>候補：</strong><br>
+          ・配信前ルーティンといえば？（深呼吸／コーヒー／鏡で笑顔／好きな曲）<br>
+          ・配信中に欲しい差し入れは？（甘いもの／のど飴／お水／お花）<br>
+          ・本番直前のメンタル状態は？（無心／緊張／ワクワク／お腹すいた）
+        </div>
+      </div>
+    </div>
+    <div class="script-block">
+      <span class="speaker">MC</span>「今日は<span style="color:var(--primary);font-weight:700">運営から喋る会じゃなくて、みなさんに喋ってもらう会</span>です。アンケート、めちゃくちゃ嬉しかったです。読みながら『うんうん、そうだよね』って声が出ました。<br>では、まずは肩慣らし。最近ハマっているものを一つだけ教えてください。スキンケアでも、推し活でも、ちいかわでも、なんでもOKです。じゃあ、◯◯さんから時計回りで！」
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">5 / 18</div></div>
+</section>
+
+<!-- ========== Slide 6: みんなの強み（セクション導入） ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">PART ② — 00:15 – 00:55</div>
+    <h2>アンケートからわかった、みんなの強み<span class="section-time">5分</span></h2>
+  </div>
+  <div class="slide-body alt">
+    <div class="lead">最初に「課題」じゃなくて「<span style="color:var(--primary)">こんなにすごい人たちが集まってる</span>」を見せます。</div>
+    <div class="strength-cloud">
+      <span class="pill lg">化粧品全般</span>
+      <span class="pill md">スキンケア</span>
+      <span class="pill md">成分・理論</span>
+      <span class="pill lg">MC・ファシリテート</span>
+      <span class="pill">天の声</span>
+      <span class="pill md">基礎化粧品</span>
+      <span class="pill">メイクアップ</span>
+      <span class="pill">メンズメイク</span>
+      <span class="pill md">健康食品</span>
+      <span class="pill">インナーケア</span>
+      <span class="pill">ヘアケア</span>
+      <span class="pill">美顔器</span>
+      <span class="pill">資生堂大好き</span>
+      <span class="pill">韓国コスメ</span>
+      <span class="pill">デパコス</span>
+      <span class="pill">Drコスメ</span>
+      <span class="pill">フェムケア</span>
+      <span class="pill">パーソナルカラー</span>
+      <span class="pill">推し活</span>
+    </div>
+    <div class="lead" style="margin-top:8px;font-size:15px">＋ 持っている資格も、すごい。</div>
+    <div class="strength-cloud">
+      <span class="pill gold">薬剤師</span>
+      <span class="pill gold">管理栄養士</span>
+      <span class="pill gold">登録販売者 ×3</span>
+      <span class="pill gold">化粧品検定1級 ×2</span>
+      <span class="pill gold">化粧品成分検定1級</span>
+      <span class="pill gold">コスメコンシェルジュ受講中</span>
+      <span class="pill gold">フェムケアスペシャリスト</span>
+      <span class="pill gold">サプリメント管理士</span>
+      <span class="pill gold">アロマテラピー検定</span>
+      <span class="pill gold">調理師</span>
+      <span class="pill gold">医療事務</span>
+      <span class="pill gold">幼児食アドバイザー</span>
+      <span class="pill gold">フードスペシャリスト</span>
+      <span class="pill gold">FP3級 ×2</span>
+      <span class="pill gold">TOPIK4級</span>
+    </div>
+    <div class="note-box">
+      <strong>MCトーク：</strong>「この資格・強みを並べると、もう小さなドラッグストアより専門家チーム。<br>これがチームとしての武器なので、今日はここをどう活かすかも一緒に考えたいです」
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">6 / 18</div></div>
+</section>
+
+<!-- ========== Slide 7: アンケート全体像 ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">SURVEY OVERVIEW — アンケート結果サマリー</div>
+    <h2>事前アンケート 9名 → 7カテゴリにAI分類<span class="section-time">5分</span></h2>
+  </div>
+  <div class="slide-body">
+    <div class="lead">いただいた声を運営側で<span style="color:var(--primary)">お名前を伏せて</span>整理しました。重なっている悩み＝みんなの悩み、です。</div>
+    <table class="data-table">
+      <thead>
+        <tr><th style="width:48px">#</th><th>カテゴリ</th><th>主なテーマ</th><th style="width:90px">声の数</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>A</td><td><strong>台本・事前共有</strong></td><td>台本到着のタイミング、商品情報の事前共有、ガチガチ台本問題</td><td>5件</td></tr>
+        <tr><td>B</td><td><strong>リハーサル・実演</strong></td><td>リハ時間の確保、実演成功率、リハ後の通し確認</td><td>3件</td></tr>
+        <tr><td>C</td><td><strong>演者同士の交流・相性</strong></td><td>共演者との初対面問題、相性の良し悪し、男性演者不足</td><td>4件</td></tr>
+        <tr><td>D</td><td><strong>補佐・運営連携</strong></td><td>補佐スタッフによる差、補佐範囲の明文化</td><td>2件</td></tr>
+        <tr><td>E</td><td><strong>ライブ中の指示・合図</strong></td><td>ジェスチャーが伝わりにくい、フリップやモニター指示の希望</td><td>1件</td></tr>
+        <tr><td>F</td><td><strong>チーム編成・役割の挑戦</strong></td><td>ディレクター兼任希望、企画段階からの参加希望</td><td>2件</td></tr>
+        <tr><td>G</td><td><strong>コメント対応・フィードバック</strong></td><td>NGワード対策、配信後の反響データ共有、活舌</td><td>3件</td></tr>
+      </tbody>
+    </table>
+    <div class="small">※ 1名で複数カテゴリにまたがる回答もあり、合計は回答者数と一致しません。</div>
+    <div class="script-block">
+      <span class="speaker">MC</span>「ここから1カテゴリずつ、<strong>2〜3個の声を読み上げ</strong>→<strong>『これ、私もそう』ってひとがいたら手挙げて／チャットで一言</strong>→<strong>『じゃあどうしたらよさそう？』をみんなで5〜6分</strong>、というリズムで進めます。」
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">7 / 18</div></div>
+</section>
+
+<!-- ========== Slide 8: カテゴリA 台本・事前共有 ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">CATEGORY A — 5分</div>
+    <h2>① 台本・事前共有について</h2>
+  </div>
+  <div class="slide-body alt">
+    <div class="tags"><span class="tag">最多 5件</span><span class="tag dark">緊急度 高</span></div>
+    <div class="voice-card">
+      <div class="voice-text">「<strong>台本が早めにほしい</strong>です。何を紹介するか決まっている場合は、<strong>紹介するものを教えていただくだけでもありがたい</strong>。私はしっかり用意して臨みたいほうなので、ギリギリで知ると焦ります」</div>
+      <div class="voice-meta">▸ 演者A</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-text">「公休や業務状況によっては、台本が<strong>直前の読み込みになってしまう</strong>。紹介商品情報だけでもいただけると予習できる可能性があります。<strong>台本共有後に疑問点を事前に共有できる場</strong>があると、メーカー確認等が事前に行える」</div>
+      <div class="voice-meta">▸ 演者B</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-text">「<strong>ガチガチの台本じゃないほうが</strong>有難いです」</div>
+      <div class="voice-meta">▸ 演者C</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-text">「ベストバイ企画の時のように、<strong>商品コメントや個人のエピソードを事前共有</strong>できると、台本への事前反映も可能ではないかと感じます」</div>
+      <div class="voice-meta">▸ 演者D</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-text">「<strong>ライブのコンセプト事前共有</strong>。服やヘアメイクなど、紹介商品やブランドに応じてご希望の雰囲気がある場合は、事前に共有いただけると、より統一感のある世界観の配信になります（メイク濃いめ／ナチュラル／華やか／さわやか 等）」</div>
+      <div class="voice-meta">▸ 演者E</div>
+    </div>
+    <div class="note-box">
+      <strong>議論の振り方：</strong>「<strong>台本がない状態でもこれだけあれば動ける</strong>っていう、<strong>最低限ほしい情報</strong>って何ですか？」と聞くのがおすすめ。「商品名だけ／成分だけ／世界観だけ」など、現実的な落としどころが見えてきます。
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">8 / 18</div></div>
+</section>
+
+<!-- ========== Slide 9: カテゴリB リハ・実演 ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">CATEGORY B — 5分</div>
+    <h2>② リハーサル・実演について</h2>
+  </div>
+  <div class="slide-body alt">
+    <div class="tags"><span class="tag">3件</span><span class="tag dark">構造課題</span></div>
+    <div class="voice-card">
+      <div class="voice-text">「<strong>実演がある時のリハーサルの時間や段取り</strong>を、もう少ししっかり時間をとってやりたい」</div>
+      <div class="voice-meta">▸ 演者F</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-text">「<strong>実演の成功率が低く、直前での修正やリハの順番修正</strong>が多々あると混乱が多い。理論と実際の状況は異なる場合も多いので成功率のコントロールは難しい場合もあるかと思いますが、<strong>リハ後にもう一度全体の流れを復習する機会</strong>を頂きたいです。その際に演者や補佐の動作確認も行いたい」</div>
+      <div class="voice-meta">▸ 演者G</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-text">「<strong>演者のバックグラウンドや悩みが台本と乖離している</strong>ことが多いと感じます。演じることは可能ですが、回数を重ねたりYouTubeと発言が乖離する懸念もあります」</div>
+      <div class="voice-meta">▸ 演者G</div>
+    </div>
+    <div class="note-box">
+      <strong>議論の振り方：</strong>「<strong>リハで一番不安になる瞬間ってどこ？</strong>」と聞くと、本音が出やすいです。<br>「実演前」「順番変更」「リハ→本番の間」など、不安ポイントが特定できれば、その瞬間に運営が何をすべきかが具体化します。
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">9 / 18</div></div>
+</section>
+
+<!-- ========== Slide 10: カテゴリC 演者交流 ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">CATEGORY C — 6分</div>
+    <h2>③ 演者同士の交流・相性</h2>
+  </div>
+  <div class="slide-body alt">
+    <div class="tags"><span class="tag">4件</span><span class="tag dark">本日の核</span></div>
+    <div class="voice-card">
+      <div class="voice-text">「<strong>演者同士の相性の良し悪しは明確にしていくべき</strong>だと感じる」</div>
+      <div class="voice-meta">▸ 演者H</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-text">「まだお会いしたことがない方がたくさんいらっしゃるのもあり、<strong>共演する方との相性によってライブの質が大きく変わってしまう</strong>のが悩み。もっと撮影前にスタジオでお話しして仲良くなってから撮影したいのですが、<strong>年下の私から話しかけづらく</strong>、いつも知っている人とコミュニケーションをとってしまうので反省しています」</div>
+      <div class="voice-meta">▸ 演者I</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-text">「<strong>演者同士の交流の機会</strong>があると、画面越しにも楽しそうな雰囲気が伝わりやすい」</div>
+      <div class="voice-meta">▸ 演者J</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-text">「<strong>男性演者の不足</strong>問題」</div>
+      <div class="voice-meta">▸ 演者H</div>
+    </div>
+    <div class="note-box">
+      <strong>議論の振り方：</strong>「相性、を言葉にすると何ですか？テンポ／リアクション／話の切り返し方？」を一緒に言語化すると、組み合わせを考える材料になります。<br>※ 個別のお名前で「この人とやりたくない」を発言させない。あくまで<strong>「型」「タイプ」レベルの会話</strong>に留めるのがコツ。
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">10 / 18</div></div>
+</section>
+
+<!-- ========== Slide 11: カテゴリD 補佐 ＆ E 指示 ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">CATEGORY D & E — 6分</div>
+    <h2>④ 補佐スタッフ・⑤ ライブ中の指示</h2>
+  </div>
+  <div class="slide-body alt">
+    <div class="grid col-2">
+      <div>
+        <div class="tags" style="margin-bottom:6px"><span class="tag">D：補佐 2件</span></div>
+        <div class="voice-card">
+          <div class="voice-text">「<strong>補佐してくださる方の違いで配信のクオリティが毎回左右される</strong>」</div>
+          <div class="voice-meta">▸ 演者K</div>
+        </div>
+        <div class="voice-card">
+          <div class="voice-text">「<strong>補佐の方によって補佐範囲に差がある</strong>。補佐役の方や演者の準備についても<strong>台本等で触れていただける</strong>と、差が減り、演者自身で準備できることも増えると考えます」</div>
+          <div class="voice-meta">▸ 演者L</div>
+        </div>
+      </div>
+      <div>
+        <div class="tags" style="margin-bottom:6px"><span class="tag">E：合図 1件</span></div>
+        <div class="voice-card">
+          <div class="voice-text">「<strong>ジェスチャーのみだけだと演者から理解しきれない</strong>場合がある。<strong>固定のジェスチャー作成</strong>や<strong>指示フリップ</strong>、<strong>モニターでの細かい指示</strong>をよりいただけると嬉しい場面もあります」</div>
+          <div class="voice-meta">▸ 演者L</div>
+        </div>
+      </div>
+    </div>
+    <div class="note-box" style="margin-top:6px">
+      <strong>議論の振り方：</strong>「<strong>補佐に絶対やってほしいこと</strong>を3つ挙げるとしたら？」を全員に聞くと、補佐マニュアル化のたたき台ができます。<br>合図は「<strong>これだけは固定したい合図</strong>」を3つだけ決める方向で。
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">11 / 18</div></div>
+</section>
+
+<!-- ========== Slide 12: カテゴリF & G ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">CATEGORY F & G — 6分</div>
+    <h2>⑥ チーム編成 / ⑦ コメント対応・FB</h2>
+  </div>
+  <div class="slide-body alt">
+    <div class="grid col-2">
+      <div>
+        <div class="tags" style="margin-bottom:6px"><span class="tag">F：役割の挑戦 2件</span></div>
+        <div class="voice-card">
+          <div class="voice-text">「<strong>天の声の時に台本送りなどのディレクターも兼任したい</strong>」</div>
+          <div class="voice-meta">▸ 演者H</div>
+        </div>
+        <div class="voice-card">
+          <div class="voice-text">「一演者ですが、<strong>面白いと思っていただけるような準備や台本、企画等にも携わらせていただけると嬉しい</strong>」</div>
+          <div class="voice-meta">▸ 演者E</div>
+        </div>
+      </div>
+      <div>
+        <div class="tags" style="margin-bottom:6px"><span class="tag">G：コメント・FB 3件</span></div>
+        <div class="voice-card">
+          <div class="voice-text">「<strong>NGワードははじかれて投稿できない</strong>ようなシステムにしていただきたい。難しければ<strong>速やかに削除できる体制</strong>を」</div>
+          <div class="voice-meta">▸ 演者E</div>
+        </div>
+        <div class="voice-card">
+          <div class="voice-text">「<strong>ライブ配信後の反響（いいね数や売上データなど）をフィードバック</strong>していただけると、個人的な反省に繋がる気がします」</div>
+          <div class="voice-meta">▸ 演者M</div>
+        </div>
+        <div class="voice-card">
+          <div class="voice-text">「<strong>自分の活舌が悪い</strong>こと」</div>
+          <div class="voice-meta">▸ 演者N</div>
+        </div>
+      </div>
+    </div>
+    <div class="note-box" style="margin-top:6px">
+      <strong>議論の振り方：</strong>「<strong>もっと深く関わりたい人</strong>はどこから？（企画／台本／ディレクション／編集）」と聞いて、<strong>レベル別の参加メニュー</strong>を一緒に考えると、運営側の組み立て材料になります。
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">12 / 18</div></div>
+</section>
+
+<!-- ========== Slide 13: 運営からのデータ共有 ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">PART ③ — 00:55 – 01:13</div>
+    <h2>運営からのデータ共有・改善状況<span class="section-time">18分</span></h2>
+  </div>
+  <div class="slide-body">
+    <div class="lead">前半でお預かりした声に応えるパート。<span style="color:var(--primary)">運営の独白にはならないように</span>、データを軸に手短に。</div>
+    <ol class="num-list">
+      <li><strong>すでに改善できていること（3分）</strong>：いただいた声のうち、運営側で着手済みの項目を簡潔に共有。「言ってよかった」を実感してもらう。</li>
+      <li><strong>良かったライブのお手本動画（5分）</strong>：直近で<strong>エンゲージメントが伸びた回</strong>を2〜3カット切り抜き。なぜ伸びたかをデータと一緒に解説（テンポ／掛け合い／実演の見せ方）。</li>
+      <li><strong>競合比較・データの状況（5分）</strong>：競合との差分。<strong>「リピーターが足りていない」</strong>など、いま向き合うべき数字を見せる。</li>
+      <li><strong>今年の方針（3分）</strong>：今年こうしていきたい、を端的に。質問・補足を演者から募る。</li>
+      <li><strong>質疑（2分）</strong>：その場で出た疑問はチャットでも口頭でも。</li>
+    </ol>
+    <div class="grid col-2">
+      <div class="card" style="border-top-color:var(--accent)">
+        <div class="card-tag" style="color:var(--accent);background:#FCF1D8">準備</div>
+        <div class="card-title">運営側の事前準備チェックリスト</div>
+        <div class="card-body">
+          ☐ 直近で伸びた回のアーカイブ切り抜き（2〜3本／各15〜30秒）<br>
+          ☐ そのカットのエンゲージメント数値（いいね・コメント・購入）<br>
+          ☐ 競合比較スライド（リピーター数 or 平均視聴時間）<br>
+          ☐ 「今年やりたいこと」3行サマリー<br>
+          ☐ 改善着手済みリスト（A〜Gの中から）
+        </div>
+      </div>
+      <div class="card" style="border-top-color:var(--accent)">
+        <div class="card-tag" style="color:var(--accent);background:#FCF1D8">注意</div>
+        <div class="card-title">この時間で<u>やらない</u>こと</div>
+        <div class="card-body">
+          ✕ 個別の演者を名指しで「ここが課題」と指摘する<br>
+          ✕ 数字を細かく説明しすぎる（資料は別途共有）<br>
+          ✕ 改善計画をその場で確約する（「持ち帰って検討」でOK）<br>
+          ✕ 運営の苦労話に時間を使う
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">13 / 18</div></div>
+</section>
+
+<!-- ========== Slide 14: 休憩 ========== -->
+<section class="slide section-divider">
+  <div>
+    <div class="d-num">— BREAK —</div>
+    <div class="d-title">5分休憩 ☕</div>
+    <div class="d-sub">カメラオフOK・席を離れてOK。<br>戻ってきたら、後半は雑談ベースでいきましょう。</div>
+    <div class="d-meta">01:13 – 01:18</div>
+  </div>
+</section>
+
+<!-- ========== Slide 15: トークテーマ座談会 説明 ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">PART ④ — 01:18 – 01:55</div>
+    <h2>トークテーマ座談会<span class="section-time">37分</span></h2>
+  </div>
+  <div class="slide-body">
+    <div class="lead">後半は、<span style="color:var(--primary)">演者のみなさんが主役</span>。トークテーマだけ用意したので、思ったことをしゃべってください。</div>
+    <div class="grid col-3">
+      <div class="card">
+        <div class="card-tag">流れ</div>
+        <div class="card-title">1テーマ＝5分が目安</div>
+        <div class="card-body">MCが次のテーマを表示 → 最初に話す人をMCが指名（1周ずつ振る）→ 自由に追加発言OK → 5分経ったら次へ。<br>盛り上がったテーマは延ばします。</div>
+      </div>
+      <div class="card">
+        <div class="card-tag">テーマ数</div>
+        <div class="card-title">7テーマ用意（うち5〜7個）</div>
+        <div class="card-body">時間内で全部こなす必要はナシ。<br>「これ話したい」テーマがあったら、Zoom投票で先に話したい順を決めるのもアリ。</div>
+      </div>
+      <div class="card">
+        <div class="card-tag">コツ</div>
+        <div class="card-title">運営はなるべく黙る</div>
+        <div class="card-body">沈黙は「次の人を当てる」だけ。<br>意見の優劣は付けない。「うんうん」「面白いね」だけでOK。<br>具体エピソードを引き出す質問で深堀りする。</div>
+      </div>
+    </div>
+    <div class="note-box">
+      <strong>運営の役割：</strong>テーマを表示して、最初の人を当てる。あとは時間管理と「他の方どう？」の振りだけ。<br>※ 議事録は運営が裏で取って、後日ハイライトをSlackに共有する旨を最初に伝える。
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">15 / 18</div></div>
+</section>
+
+<!-- ========== Slide 16: トークテーマ一覧 ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">TALK THEMES — 7テーマ</div>
+    <h2>トークテーマカード</h2>
+  </div>
+  <div class="slide-body alt">
+    <div class="theme-grid">
+      <div class="theme-card">
+        <div class="theme-num">THEME 01</div>
+        <div class="theme-title">マツココライブが、<br>こうなったらテンション上がる！</div>
+        <div class="theme-desc">「フォロワーがすごい」「あの商品扱える」「●●ができる」など、<strong>理想の状態</strong>を妄想ベースで一言ずつ。</div>
+        <div class="theme-tag">▸ 全員必須／導入テーマ</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-num">THEME 02</div>
+        <div class="theme-title">私が思う「<br>いいライブ」の3条件</div>
+        <div class="theme-desc">演者目線・視聴者目線・運営目線、どこからでもOK。<strong>3つだけ</strong>選んで言葉にしてみる。</div>
+        <div class="theme-tag">▸ 個性が出る／強みも見える</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-num">THEME 03</div>
+        <div class="theme-title">共演者と<br>「これしてみたかった」企画</div>
+        <div class="theme-desc">「◯◯さんとガチ対決企画」「成分解説バトル」「悩み相談ライブ」など、<strong>演者発の企画アイデア</strong>。</div>
+        <div class="theme-tag">▸ 企画参加意欲の汲み上げ</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-num">THEME 04</div>
+        <div class="theme-title">本番前後の<br>ルーティン・縁起担ぎ</div>
+        <div class="theme-desc">配信前にやること、終わったあとにやること。<br><strong>軽めに笑える話</strong>。緊張ほぐし兼ねて。</div>
+        <div class="theme-tag">▸ アイスブレイク的／盛り上がる</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-num">THEME 05</div>
+        <div class="theme-title">「相性がいい」って、<br>具体的にどういう状態？</div>
+        <div class="theme-desc">テンポ？リアクション？切り返し？<strong>「相性」を言葉にする</strong>テーマ。組み合わせを考えるヒントに。</div>
+        <div class="theme-tag">▸ 前半の延長線上／本音歓迎</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-num">THEME 06</div>
+        <div class="theme-title">自分の強みを、もっと活かすなら<br>こういう案件をやりたい</div>
+        <div class="theme-desc">資格・ジャンル・キャラから、<strong>「私こういう仕事できますよ」のセルフアピール</strong>。運営のキャスティング材料。</div>
+        <div class="theme-tag">▸ 強みワードクラウドの伏線回収</div>
+      </div>
+      <div class="theme-card">
+        <div class="theme-num">THEME 07</div>
+        <div class="theme-title">運営に「これだけは伝えたい」<br>最後の一言</div>
+        <div class="theme-desc">アンケートに書ききれなかったこと、今日話して気づいたこと、なんでもOK。<strong>1人ずつ必ず一言</strong>。</div>
+        <div class="theme-tag">▸ クロージング前のフィナーレ</div>
+      </div>
+      <div class="theme-card" style="background:#FAF7F2;border-top-color:var(--muted)">
+        <div class="theme-num" style="background:var(--muted)">予備</div>
+        <div class="theme-title">男性演者がいたらやってみたい絡み</div>
+        <div class="theme-desc">男性演者不足という声を踏まえて、<strong>もし男性演者がいたら</strong>という前提でアイデア出し。盛り上がらなければスキップ。</div>
+        <div class="theme-tag">▸ 余ったら使う</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">16 / 18</div></div>
+</section>
+
+<!-- ========== Slide 17: クロージング ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">PART ⑤ — 01:55 – 02:00</div>
+    <h2>クロージング・Next Step<span class="section-time">5分</span></h2>
+  </div>
+  <div class="slide-body">
+    <div class="lead">最後は短めに。<span style="color:var(--primary)">「言ってよかった」「また話したい」</span>と思って退室してもらうのがゴール。</div>
+    <ol class="num-list">
+      <li><strong>運営からの感謝（30秒）</strong>：今日の本音、ありがとうございました。</li>
+      <li><strong>持ち帰りリストの読み上げ（2分）</strong>：今日出た意見のうち、<strong>「運営が持ち帰って検討するもの」</strong>を箇条書きで読み上げる。約束ではなく「検討します」でOK。</li>
+      <li><strong>次のアクション予告（1分）</strong>：議事ハイライトのSlack共有 ／ 改善内容の進捗を分科会で報告 ／ 次回フィードバック会の頻度（半年に1回など）。</li>
+      <li><strong>みなさんから一言（1.5分）</strong>：時間が許せば、感想ひとことずつ。難しければスキップ。</li>
+    </ol>
+    <div class="grid col-2">
+      <div class="card" style="border-top-color:var(--accent)">
+        <div class="card-tag" style="color:var(--accent);background:#FCF1D8">運営アクション</div>
+        <div class="card-title">会の終了後</div>
+        <div class="card-body">
+          ・<strong>議事メモのハイライト</strong>を24h以内にSlack共有<br>
+          ・<strong>持ち帰り項目の整理表</strong>を1週間以内に共有<br>
+          ・<strong>分科会での進捗報告</strong>に組み込む<br>
+          ・参加者にお礼DM
+        </div>
+      </div>
+      <div class="card" style="border-top-color:var(--accent)">
+        <div class="card-tag" style="color:var(--accent);background:#FCF1D8">演者へのお願い</div>
+        <div class="card-title">最後に共有しておくこと</div>
+        <div class="card-body">
+          ・今日話せなかったこと、後からでもDMでOK<br>
+          ・<strong>共演前の事前チャット</strong>を解禁したい意思<br>
+          ・次回は<strong>男性演者を交えた回</strong>もできたら<br>
+          ・引き続き、よろしくお願いします
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">17 / 18</div></div>
+</section>
+
+<!-- ========== Slide 18: 運営の準備チェックリスト ========== -->
+<section class="slide">
+  <div class="slide-header">
+    <div class="section-tag">CHECKLIST — 運営の準備</div>
+    <h2>当日までにやること（運営チーム）</h2>
+  </div>
+  <div class="slide-body alt">
+    <div class="grid col-2">
+      <div class="card">
+        <div class="card-tag">3日前まで</div>
+        <div class="card-title">準備物・依頼</div>
+        <div class="card-body">
+          ☐ 出演者確定（4〜5名）／日程リマインド<br>
+          ☐ アンケート結果の<strong>匿名化サマリー</strong>を演者に事前共有<br>
+          ☐ 「気軽な会です」のメッセージ送付<br>
+          ☐ Zoomリンク・録画なしの旨を明記<br>
+          ☐ 直近のアーカイブから「お手本切り抜き」2〜3本作成<br>
+          ☐ 競合データ・改善着手リストを最終化
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-tag">前日</div>
+        <div class="card-title">運営内リハ・当日資料</div>
+        <div class="card-body">
+          ☐ MC（モリー）と運営チームで<strong>進行通し</strong>（30分）<br>
+          ☐ アンケートカテゴリ別「振り方」のすり合わせ<br>
+          ☐ Zoom投票の設問セットアップ<br>
+          ☐ 共有画面の切替順序を決める（このHTMLでOK）<br>
+          ☐ 議事メモ担当を決める（運営の誰か）
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-tag">当日30分前</div>
+        <div class="card-title">直前確認</div>
+        <div class="card-body">
+          ☐ Zoomホスト権限・共同ホスト設定<br>
+          ☐ 投票・ホワイトボード機能の動作確認<br>
+          ☐ 切り抜き動画の音量チェック<br>
+          ☐ MC・サポートの役割確認（誰がメモ？誰が時間管理？）<br>
+          ☐ チャットでの「補足歓迎」アナウンス文を準備
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-tag">当日終了後</div>
+        <div class="card-title">フォローアップ</div>
+        <div class="card-body">
+          ☐ 24h以内：議事ハイライトをSlack共有<br>
+          ☐ 1週間以内：持ち帰り項目の整理表共有<br>
+          ☐ 各演者へのお礼DM<br>
+          ☐ 分科会で進捗報告に組み込み<br>
+          ☐ 次回フィードバック会の日程仮決め
+        </div>
+      </div>
+    </div>
+    <div class="note-box">
+      <strong>議事録メモのコツ：</strong>カテゴリA〜Gのフォーマットそのまま使い、各カテゴリごとに「<strong>新しく出た意見</strong>」「<strong>運営持ち帰り項目</strong>」の2列だけ書き留めれば、終了後の整理が一気に早くなります。
+    </div>
+  </div>
+  <div class="slide-footer"><div class="left">MATSUKOKO LIVE — Performer Feedback</div><div class="right">18 / 18</div></div>
+</section>
+
+</div>
+
+<nav class="nav-bar">
+  <button class="nav-btn" id="prev-btn" onclick="changeSlide(-1)" disabled>← 前へ</button>
+  <span class="slide-counter" id="slide-counter">1 / 18</span>
+  <button class="nav-btn" id="next-btn" onclick="changeSlide(1)">次へ →</button>
+</nav>
+<div class="last-updated">最終更新：2026年5月7日 02:49 ／ MATSUKOKO LIVE 出演者フィードバック会</div>
+
+<script>
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  document.getElementById('slide-counter').textContent = '1 / ' + total;
+  function changeSlide(dir){
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(total - 1, current + dir));
+    slides[current].classList.add('active');
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('prev-btn').disabled = current === 0;
+    document.getElementById('next-btn').disabled = current === total - 1;
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); changeSlide(-1); }
+  });
+</script>
+</body>
+</html>
